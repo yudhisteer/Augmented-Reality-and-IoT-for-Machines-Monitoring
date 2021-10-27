@@ -192,6 +192,144 @@ Hence if the temperature is ```greater than 37``` degrees, then the flange turns
             //Debug.Log(tempText.text);
 ```
 
+The result is as such:
+
+![image](https://user-images.githubusercontent.com/59663734/139117347-f3029cc0-c79f-4313-958f-f8132223fd9d.png)
+
+
+
+
+## Creating the Dashboard Scene
+Next, I created a second scene for the Dashboard and I used an **Image Target**. I used an image of pebbles given by Vuforia that is easily processed with a rating of ```5``` stars as it has many features as shown below:
+
+![image](https://user-images.githubusercontent.com/59663734/139117528-a8820811-95f4-4d3a-a02e-a2b1bc73f273.png)
+
+The yellow points shows the points that will be tracked by the Vuforia Engine Image Recognition.
+
+We then create 2 buttons for the Humidity and Temperature Values and with their placeholders for the values. 
+
+![image](https://user-images.githubusercontent.com/59663734/139117578-296aafb5-ad4b-41f1-bc83-f11e468b2b59.png)
+
+We then write the code in the same BluetoothManager script to update the values for the two variables:
+
+```
+		else{
+			//update dashboard
+			//create graph
+            humidityText2 = GameObject.Find("HumidityValueText").GetComponent<Text>();
+            tempText2 = GameObject.Find("TemptValueText").GetComponent<Text>();
+			humidityText2.text = humidityVal + "%";
+			//Debug.Log("Updating Dashboard");
+			tempText2.text = temperatureVal + "C";
+
+            chart = GameObject.Find("GraphChart").GetComponent<GraphChart>();
+            
+            chart.DataSource.AddPointToCategoryRealtime("Temperature", X, temperatureVal, 1f);
+            chart.DataSource.AddPointToCategoryRealtime("Humidity", X, humidityVal, 1f);
+            X++;
+```
+
+We attach the ```‘temperatureVal’``` and ```‘humidityVal’``` in the following placeholders.
+
+Next, we also want to show how the temperature and humidity changes with time, hence, we need to show their Graph in real-time. For this, we used a plugin called ```GraphandChart``` and modified their ```Stream Live Graph``` example to fit our context.
+
+
+Next, we want to show the graph only when the user presses on the ```Virtual Button``` hence, we create an instance of a virtual button and places it right above the image of the button on the ```Image Target```. We create an ```OnButtonPressed``` function that would set the Live graph true when the button is pressed.
+
+
+```
+
+public class VirtualButtonScript : MonoBehaviour
+{
+    public GameObject sphereGo, cubeGo;
+    public GameObject LiveStream;
+    private bool curActive;
+    VirtualButtonBehaviour[] vbs;
+    // Start is called before the first frame update
+    void Start()
+    {
+        vbs = GetComponentsInChildren<VirtualButtonBehaviour>();
+        for (int i = 0; i < vbs.Length; ++i)
+        {
+            vbs[i].RegisterOnButtonPressed(OnButtonPressed);
+            vbs[i].RegisterOnButtonReleased(OnButtonReleased);
+        }
+        //sphereGo.SetActive(false);
+        //cubeGo.SetActive(true);
+
+        curActive = false;
+    }
+
+    public void OnButtonPressed(VirtualButtonBehaviour vb)
+    {
+        //sphereGo.SetActive(true);
+        //cubeGo.SetActive(false);
+
+
+        Debug.Log("Button Pressed");
+        if(curActive == true){
+            LiveStream.SetActive(false);
+            curActive = false;
+        }
+
+        if(curActive == false){
+            LiveStream.SetActive(true);
+            curActive = true;
+        }
+    }
+
+    public void OnButtonReleased(VirtualButtonBehaviour vb)
+    {
+        //cubeGo.SetActive(true);
+        //sphereGo.SetActive(false);
+    }
+}
+```
+
+When testing, the result shown be as follows:
+
+![image](https://user-images.githubusercontent.com/59663734/139118131-7bfe8a9f-c49a-4f7e-9d89-67a0884f5607.png)
+
+### Troubleshooting
+One problem I was getting when playing both scenes is that the values for the temperature and humidity would get carried from one scene to the other and I would get an error message as such:
+
+![image](https://user-images.githubusercontent.com/59663734/139118225-0fa33c93-67a4-4c41-993d-7608c97573be.png)
+
+Although using the LoadSceneManagement changes the scene, the data is still being carried from one scene to the other. What we need to do is to Disconnect the streaming of data when switching scenes and Reconnect again manually. We do so by adding this code to the BluetoothManager Script:
+
+```
+#Update Scene
+Scene scene = SceneManager.GetActiveScene();
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Part II
 
