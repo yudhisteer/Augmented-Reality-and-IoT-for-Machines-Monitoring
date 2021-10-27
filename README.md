@@ -20,7 +20,7 @@ Reading data from Bluetooth seemed more feasible as everything would happen loca
 
 To start simple, we would set up a temperature sensor with a microcontroller and then work with the data collected to create the dashboard.
 
-## Action plan
+## Action plan for Phase I
 
 1. Setup Arduino and sensors
 2. Setup  ArduinoBluetoothAPI plugin
@@ -332,32 +332,21 @@ Working with the bluetooth module at first validated the hypothesis that we can 
 
 
 
+## Phase II: AR with IoT
+This second sub-phase will perform the same functions as the Bluetooth one except it will not read the data locally but from the Cloud using a WiFi module.
 
+## Action plan for Phase II
 
+1. Setup Arduino and Sensors
 
+### 1. Setup Arduino and Sensors
 
+Setting the Hardware
+The components needed are:
+ NodeMCU
+DHT11 temperature sensor
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Part II
+I set up the following connections :
 
 ![Copy of Internship 2020 (4)](https://user-images.githubusercontent.com/59663734/134491196-b56106c4-11a5-48ee-bf03-a7c060393abe.jpg)
 
