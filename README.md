@@ -338,15 +338,134 @@ This second sub-phase will perform the same functions as the Bluetooth one excep
 ## Action plan for Phase II
 
 1. Setup Arduino and Sensors
+2. Setting the MQTT Protocol
+3. Coding the NodeMCU
+4. Display Values in Real-Time
 
 ### 1. Setup Arduino and Sensors
 
-Setting the Hardware
+### Setting the Hardware
+
 The components needed are:
- NodeMCU
-DHT11 temperature sensor
+
+- NodeMCU
+- DHT11 temperature sensor
 
 I set up the following connections :
 
 ![Copy of Internship 2020 (4)](https://user-images.githubusercontent.com/59663734/134491196-b56106c4-11a5-48ee-bf03-a7c060393abe.jpg)
+
+### 2. Setting the MQTT Protocol
+
+Next, we need to send the data to the Cloud so we will need a MQTT broker which is a server that receives all messages from the clients and then routes the messages to the appropriate destination clients. An MQTT client is any device (from a micro controller up to a full-fledged server) that runs an MQTT library and connects to an MQTT broker over a network.
+
+MQTT is a simple messaging protocol, designed for constrained devices with low-bandwidth. So, it's the perfect solution for Internet of Things applications. MQTT allows us to send commands to control outputs, read and publish data from sensor nodes and much more. Since most of these MQTT brokers have a publish-based-subscribe price, I would need an open-source one which is free for testing. 
+
+ThingSpeak is an open-source Internet of Things (IoT) application and API to store and retrieve data from things using the HTTP and MQTT protocol over the Internet or via a Local Area Network. ThingSpeak enables the creation of sensor logging applications, location tracking applications, and a social network of things with status updates.
+
+![image](https://user-images.githubusercontent.com/59663734/139120646-9468ff20-07af-4dc4-92cc-4bdcce47337c.png)
+
+We start by creating a Channel and add the Field Values which we will need. We will get a Dashboard as such where we will view the data live:
+
+![image](https://user-images.githubusercontent.com/59663734/139120728-eed4e9d6-d325-4a19-8fd4-782e704dbc9d.png)
+
+### 3. Coding the NodeMCU
+
+To code the MCU we will need the ```internet SSID```, ```password```, and the ```READ API``` key from ThingSpeak. 
+
+```
+#include <DHT.h>  // Including library for dht 
+#include <ESP8266WiFi.h>
+ 
+String apiKey = "***************8";     //  Enter your Write API key from ThingSpeak
+ 
+const char *ssid =  "Telecom-2acb";     // replace with your wifi ssid and wpa2 key
+const char *pass =  "***************";
+const char* server = "api.thingspeak.com";
+ 
+#define DHTPIN 0          //pin where the dht11 is connected
+ 
+DHT dht(DHTPIN, DHT11);
+ 
+WiFiClient client;
+ 
+void setup() 
+{
+       Serial.begin(115200);
+       delay(5000);
+       dht.begin();
+ 
+       Serial.println("Connecting to ");
+       Serial.println(ssid);
+ 
+ 
+       WiFi.begin(ssid, pass);
+ 
+      while (WiFi.status() != WL_CONNECTED) 
+     {
+            delay(500);
+            Serial.print(".");
+     }
+      Serial.println("");
+      Serial.println("WiFi connected");
+ 
+}
+ 
+void loop() 
+{
+  
+      float h = dht.readHumidity();
+      float t = dht.readTemperature();
+      
+              if (isnan(h) || isnan(t)) 
+                 {
+                     Serial.println("Failed to read from DHT sensor!");
+                      return;
+                 }
+ 
+                         if (client.connect(server,80))   //   "184.106.153.149" or api.thingspeak.com
+                      {  
+                            
+                             String postStr = apiKey;
+                             postStr +="&field1=";
+                             postStr += String(t);
+                             postStr +="&field2=";
+                             postStr += String(h);
+                             postStr += "\r\n\r\n";
+ 
+                             client.print("POST /update HTTP/1.1\n");
+                             client.print("Host: api.thingspeak.com\n");
+                             client.print("Connection: close\n");
+                             client.print("X-THINGSPEAKAPIKEY: "+apiKey+"\n");
+                             client.print("Content-Type: application/x-www-form-urlencoded\n");
+                             client.print("Content-Length: ");
+                             client.print(postStr.length());
+                             client.print("\n\n");
+                             client.print(postStr);
+ 
+                             Serial.print("Temperature: ");
+                             Serial.print(t);
+                             Serial.print(" degrees Celcius, Humidity: ");
+                             Serial.print(h);
+                             Serial.println("%. Send to Thingspeak.");
+                        }
+          client.stop();
+ 
+          Serial.println("Waiting...");
+  
+  // thingspeak needs minimum 15 sec delay between updates
+  delay(15000);
+}
+
+```
+
+### 4. Display Values in Real-Time
+
+The data will be viewed in the Arduino IDE as such:
+
+![image](https://user-images.githubusercontent.com/59663734/139121710-69c6afa7-7152-45f7-9950-657dd90ad71e.png)
+
+And the dashboard in ThingSpeak will be like this:
+
+![image](https://user-images.githubusercontent.com/59663734/139121799-c0deab10-3f2f-4bf5-bc1c-8a98d0a62dad.png)
 
