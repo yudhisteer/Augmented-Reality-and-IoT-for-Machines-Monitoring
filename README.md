@@ -20,7 +20,19 @@ Reading data from Bluetooth seemed more feasible as everything would happen loca
 
 To start simple, we would set up a temperature sensor with a microcontroller and then work with the data collected to create the dashboard.
 
-## 1. AR with Bluetooth
+## Action plan
+
+1. Setup Arduino and sensors
+2. Setup  ArduinoBluetoothAPI plugin
+3. Write function to process sensor values
+4. Write code to change color of flange
+5. Creating the Dashboard Scene
+6. Create function to display real-time values from sensor
+7. Setup up Stream Live Graph using a Virtual Button
+8. Troubleshooting
+9. Evaluation
+
+## Phase I: AR with Bluetooth
 
 The scenario would be that we have a temperature sensor in the pump and we would need to get the data in real-time and display it in a dashboard. 
 
@@ -29,6 +41,8 @@ The benefit of working with AR is that it helps us in displaying the data in a m
 The **principle of Human Computer Interaction(HCI)** says that : “Displays are human-made artifacts designed to support the perception of relevant system variables and to facilitate further processing of that information. Before a display is designed, the task that the display is intended to support must be defined (e.g. navigating, controlling, decision making, learning, entertaining, etc.). A user or operator must be able to process whatever information that a system generates and displays; therefore, the information must be displayed according to principles in a manner that will support perception, situation awareness, and understanding.”
 
 The answer to show situation awareness in the context of knowing whether a certain temperature is safe is **Color**. Color helps us distinguish whether we reached a safe level or a critical one. A Red color will show the temperature is high hence, should be reduced and a Blue one will show inactivity or a safe level.
+
+### 1. Setup Arduino and sensors
 
 The components needed are:
 
@@ -70,6 +84,9 @@ delay(1000);//Wait 5 seconds before accessing sensor again.
 When running the code, the result would display in the Arduino IDE as such:
 
 ![image](https://user-images.githubusercontent.com/59663734/134491727-d204919e-dada-48e6-8926-504d9a869083.png)
+
+
+### 2. Setup  ArduinoBluetoothAPI plugin
 
 Using the ArduinoBluetoothAPI plugin I created a BluetoothManager.cs script that would allow me to decrypt the data from the bluetooth and parse it using a BluetoothHelper. The data received are not stored as variables but instead auto-updated as a string called “OnMessageReceived”. When pressing the “Connect” button in the GameScene, the data starts being read in the Console of Unity:
 
@@ -113,6 +130,8 @@ public class BluetoothManager : MonoBehaviour
 	public bool pump_visual;
 ```
 
+### 3. Write function to process sensor values
+
 We then write a function that will process the temperature and humidity values:
 
 ```
@@ -152,6 +171,8 @@ We then write a function that will process the temperature and humidity values:
 ```
 
 The message received from the arduino is in the format: ```"Current humidity = [ ] % temperature = [ ] C.``` However, we only need the integers in the square brackets. To truncate a string we would check its length, then use substring to limit it's length from ```0``` to the ideal length.
+
+### 4. Write code to change color of flange
 
 Next, we write the code that will change the ```color``` of the flange according to certain temperatures:
 
@@ -197,9 +218,8 @@ The result is as such:
 ![image](https://user-images.githubusercontent.com/59663734/139117347-f3029cc0-c79f-4313-958f-f8132223fd9d.png)
 
 
+### 5. Creating the Dashboard Scene
 
-
-## Creating the Dashboard Scene
 Next, I created a second scene for the Dashboard and I used an **Image Target**. I used an image of pebbles given by Vuforia that is easily processed with a rating of ```5``` stars as it has many features as shown below:
 
 ![image](https://user-images.githubusercontent.com/59663734/139117528-a8820811-95f4-4d3a-a02e-a2b1bc73f273.png)
@@ -209,6 +229,8 @@ The yellow points shows the points that will be tracked by the Vuforia Engine Im
 We then create 2 buttons for the Humidity and Temperature Values and with their placeholders for the values. 
 
 ![image](https://user-images.githubusercontent.com/59663734/139117578-296aafb5-ad4b-41f1-bc83-f11e468b2b59.png)
+
+### 6. Create function to display real-time values from sensor
 
 We then write the code in the same BluetoothManager script to update the values for the two variables:
 
@@ -231,10 +253,11 @@ We then write the code in the same BluetoothManager script to update the values 
 
 We attach the ```‘temperatureVal’``` and ```‘humidityVal’``` in the following placeholders.
 
+### 7. Setup up Stream Live Graph using a Virtual Button
+
 Next, we also want to show how the temperature and humidity changes with time, hence, we need to show their Graph in real-time. For this, we used a plugin called ```GraphandChart``` and modified their ```Stream Live Graph``` example to fit our context.
 
-
-Next, we want to show the graph only when the user presses on the ```Virtual Button``` hence, we create an instance of a virtual button and places it right above the image of the button on the ```Image Target```. We create an ```OnButtonPressed``` function that would set the Live graph true when the button is pressed.
+We want to show the graph only when the user presses on the ```Virtual Button``` hence, we create an instance of a virtual button and places it right above the image of the button on the ```Image Target```. We create an ```OnButtonPressed``` function that would set the Live graph true when the button is pressed.
 
 
 ```
@@ -290,7 +313,7 @@ When testing, the result shown be as follows:
 
 ![image](https://user-images.githubusercontent.com/59663734/139118131-7bfe8a9f-c49a-4f7e-9d89-67a0884f5607.png)
 
-### Troubleshooting
+### 8. Troubleshooting
 One problem I was getting when playing both scenes is that the values for the temperature and humidity would get carried from one scene to the other and I would get an error message as such:
 
 ![image](https://user-images.githubusercontent.com/59663734/139118225-0fa33c93-67a4-4c41-993d-7608c97573be.png)
@@ -302,6 +325,9 @@ Although using the LoadSceneManagement changes the scene, the data is still bein
 Scene scene = SceneManager.GetActiveScene();
 ```
 
+### 9. Evaluation
+
+Working with the bluetooth module at first validated the hypothesis that we can set up a communication protocol between these platforms - ```Unity/Vuforia``` and ```Bluetooth/Cloud```. I designed the functions that will be needed - ```Live Data``` and ```Dashboard```. Now, we will need to do the same thing using ```Cloud``` to retrieve the data and without any plugins. 
 
 
 
