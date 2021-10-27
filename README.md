@@ -41,14 +41,29 @@ The components needed are:
 And wrote its code to read the temperature and humidity:
 
 ```
+#include <dht11.h>
+#define dht_apin A0 // Analog Pin sensor is connected to
 
+dht11 DHT11;
+void setup(){
+Serial.begin(9600);
+delay(500);//Delay to let system boot
+Serial.println("DHT11 Humidity & temperature Sensor\n\n");
+delay(1000);//Wait before accessing Sensor
+}//end "setup()"
 
-
-
-
-
-
-
+void loop(){
+//Start of Program
+DHT11.read(dht_apin);
+Serial.print("Current humidity = ");
+Serial.print(DHT11.humidity);
+Serial.print("% ");
+Serial.print("temperature = ");
+Serial.print(DHT11.temperature);
+Serial.println("C ");
+delay(1000);//Wait 5 seconds before accessing sensor again.
+//Fastest should be once every two seconds.
+}// end loop(
 
 ```
 
@@ -64,13 +79,121 @@ Similar to the AR project in phase one, we will have two scenes: Live-Data Scene
 
 We start by importing a 3D model of the pump and position and scale it as done before. We choose a Grey color for the flange and insert a TextMeshPro UI object and place it just above the flange. The UI object is a placeholder for the temperature value which will be updated in real-time from the temperature sensor.
 
+![image](https://user-images.githubusercontent.com/59663734/139116291-137db1ca-dc30-4117-acad-498c95674b76.png)
+
+
 Now, we modify the BluetoothManager script to add the temperature values to the scene. 
-We start by creating the necessary public class for both scenes:
+
+We start by initializing our public class ```BluetoothManager```:
+
+```
+public class BluetoothManager : MonoBehaviour
+{
+
+	// Use this for initialization
+	BluetoothHelper bluetoothHelper;
+	string deviceName;
+	public Text text;
+	public TextMeshPro tempText;
+	public TextMeshPro humidityText;
+	public Text tempText2;
+	public Text humidityText2;
+	public int humidityVal;
+	public int temperatureVal;
+    private float X;
+    private GraphChart chart;
+
+	public GameObject flange;
+
+	//public GameObject sphere;
+
+	string received_message;
+
+	public int testTemp;
+	public bool pump_visual;
+```
+
+We then write a function that will process the temperature and humidity values:
+
+```
+	//Function to process temperature and humidity
+	//could be moved to independent script for clarity
+	void parseTempHumidity (string message){
+		//message format is "Current humidity = []% temperature = []C
+		//18th index is humidity
+		//temp is last 4 characters. Remove the C and the = if applicable
+
+		int humidityIndex = 18;
+		string humidityTruncated = message.Substring(18, 3);
+		//Debug.Log(humidityTruncated);
+		string tempTrunctated = message.Substring(message.Length - 7);
+        //Debug.Log(tempTrunctated);
+		string humidity = string.Empty;
+		//process humidity string to get just the number
+		for(int i=0; i<humidityTruncated.Length; i++){
+			if(Char.IsDigit(humidityTruncated[i])){
+				humidity +=humidityTruncated[i];
+			}
+
+		}
+		humidityVal = int.Parse(humidity);
+
+		//parse temperature similarly
+		string temperature = string.Empty;
+		for(int i=0; i<tempTrunctated.Length; i++){
+			if(Char.IsDigit(tempTrunctated[i])){
+				temperature +=tempTrunctated[i];
+			}
+		}
+		temperatureVal = int.Parse(temperature);
+
+		//Debug.Log("Temp is: " + temperatureVal);		
+		//Debug.Log("Humidity is: " + humidityVal);
+```
+
+The message received from the arduino is in the format: ```"Current humidity = [ ] % temperature = [ ] C.``` However, we only need the integers in the square brackets. To truncate a string we would check its length, then use substring to limit it's length from ```0``` to the ideal length.
+
+Next, we write the code that will change the ```color``` of the flange according to certain temperatures:
+
+We initialized the ```Red```, ```Blue``` and ```Green``` color and then used the ```Mathf.Clamp``` function which constrains the given value between the given minimum float and maximum float values. It returns the min value if the given float value is less than the min and returns the max value if the given value is greater than the max value.  
+
+Hence if the temperature is ```greater than 37``` degrees, then the flange turns to Red color. ```Between 22 and 37``` degrees it is Green Color and ```below 22``` degrees it is Blue color.
+
+```
+        Scene scene = SceneManager.GetActiveScene();
+
+		//true if pump scene. False for just dashboard
+		if (scene.name=="PumpScene"){
+			//change color
+			float RedColor;
+			float GreenColor;
+			float BlueColor;
 
 
+			//borrowed from https://github.com/augmentedstartups/IoTAR/blob/master/Lab_8_Hot_Drink_Sensor/Unity%20Scripts/ColorChange.cs
+			RedColor =   Mathf.Clamp((temperatureVal-22)/(37-22),0,1);
+			if(temperatureVal >= 22)
+			{
+				GreenColor =   Mathf.Clamp((37 - temperatureVal)/(37-22),0,1);
+			}
+			else
+			{
+				GreenColor =   Mathf.Clamp((temperatureVal-15)/(22-15),0,1);
+			}
+
+			BlueColor =  Mathf.Clamp((22-temperatureVal)/(22-15),0,1);
+
+            flange = GameObject.Find("Flange");
+			flange.GetComponent<Renderer>().material.color = new Color(RedColor, GreenColor, BlueColor);
+			//Debug.Log("updated Pump flange color");
+            tempText = GameObject.Find("TempText").GetComponent<TextMeshPro>();
+			tempText.text = temperatureVal + "C";
+            //Debug.Log("//////////");
+            //Debug.Log(tempText.text);
+```
 
 
-
+# Part II
 
 ![Copy of Internship 2020 (4)](https://user-images.githubusercontent.com/59663734/134491196-b56106c4-11a5-48ee-bf03-a7c060393abe.jpg)
 
