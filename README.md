@@ -341,6 +341,8 @@ This second sub-phase will perform the same functions as the Bluetooth one excep
 2. Setting the MQTT Protocol
 3. Coding the NodeMCU
 4. Display Values in Real-Time
+5. Troubleshooting
+6. Setting Firebase
 
 ### 1. Setup Arduino and Sensors
 
@@ -468,4 +470,25 @@ The data will be viewed in the Arduino IDE as such:
 And the dashboard in ThingSpeak will be like this:
 
 ![image](https://user-images.githubusercontent.com/59663734/139121799-c0deab10-3f2f-4bf5-bc1c-8a98d0a62dad.png)
+
+### 5. Troubleshooting
+
+However, it was not possible to set up a connection between ThingSpeak and Unity with the UnityWebRequest function. Since ThingSpeak converts the real-time data into Json, we will need to use a Json parser to decrypt the data, truncate the parts we will need and then compile it into Unity. Another solution could be to save the data and use XML to fetch the data, alas, the deadline was close and I needed to present the project soon. I needed another solution and I decided to use **Google Firebase** instead.
+
+### 6. Setting Firebase
+
+The difference between Firebase and ThingSpeak is that Firebase is a web application backend and ThingSpeak-MQTT is standard for publish-subscribe messages. Firebase Cloud Messaging  uses HTTP and XMPP Server Protocol serving JSON and Plain Text both.
+
+In our case, we are interested in creating a real-time database and Firebase offers just that. The Firebase Realtime Database is a cloud-hosted NoSQL database that lets us store and sync data between users in real time. Also, Firebase does not store data but only displays the current values being registered.
+
+![image](https://user-images.githubusercontent.com/59663734/139122669-d016364e-b84f-48a2-9551-412ee1ec979c.png)
+
+So instead of using HTTP API to fetch data as would have done in ThingSpeak, we will now use the SDK for Unity that Firebase offers us to set up communication between our real-time database and Unity.
+
+Similar to ThingSpeak we set up a project in Firebase and create two variables to store our data with an initial value of ```0```. Our dashboard will look like this:
+
+![image](https://user-images.githubusercontent.com/59663734/139122774-55d191b5-4713-48d2-b716-8cb13cfb7270.png)
+
+We then need to copy our Bundle Identifier tag to Firebase and download the google-services.json to upload into Unity. We will use a RestAPI to directly send and retrieve data from Firebase.
+
 
