@@ -727,5 +727,10 @@ We then need to fetch data from Firebase and feed it into the graphs:
 
 ## Conclusion
 
+Sending data to the cloud means it can be accessed anywhere in the world. With the coming IoT projects, my AR-WiFi research will be valuable in creating dashboards and in representing the data collected into a more user-friendly way. Changing the color of the flange and the slider going up just as a thermometer would do gives a user the necessary information to understand the current situation he is in.
 
+The AR-WiFi project received more positive reviews as it solves a real problem of having dashboards available at different endpoints throughout the company for maintenance technicians, operators, QA and so on. They do not need to install computers to have access to these data or signing in a website. They will now have access registered by their sensors with the touch of a button in their mobile phone.
+
+
+The full video of the project can be found at this link: https://www.youtube.com/watch?v=-7YdQC8Mivg&ab_channel=YudhisteerChintaram and https://www.youtube.com/watch?v=gVTD8ZNxCK4&ab_channel=YudhisteerChintaram
 
