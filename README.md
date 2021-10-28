@@ -330,7 +330,10 @@ Scene scene = SceneManager.GetActiveScene();
 Working with the bluetooth module at first validated the hypothesis that we can set up a communication protocol between these platforms - ```Unity/Vuforia``` and ```Bluetooth/Cloud```. I designed the functions that will be needed - ```Live Data``` and ```Dashboard```. Now, we will need to do the same thing using ```Cloud``` to retrieve the data and without any plugins. 
 
 
+Video of full project can be found at this link: https://www.youtube.com/watch?v=gVTD8ZNxCK4&ab_channel=YudhisteerChintaram
 
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## Phase II: AR with IoT
 This second sub-phase will perform the same functions as the Bluetooth one except it will not read the data locally but from the Cloud using a WiFi module.
