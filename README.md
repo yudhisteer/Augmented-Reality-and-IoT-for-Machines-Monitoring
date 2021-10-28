@@ -750,3 +750,8 @@ https://user-images.githubusercontent.com/59663734/139234279-54bdd595-88da-4742-
 
 The full video of the project can be found at this link: https://www.youtube.com/watch?v=-7YdQC8Mivg&ab_channel=YudhisteerChintaram and https://www.youtube.com/watch?v=gVTD8ZNxCK4&ab_channel=YudhisteerChintaram
 
+## References
+1. https://mqtt.org/
+2. https://thingspeak.com/
+3. https://assetstore.unity.com/packages/tools/gui/graph-and-chart-78488
+4. https://assetstore.unity.com/packages/tools/input-management/arduino-bluetooth-plugin-98960
