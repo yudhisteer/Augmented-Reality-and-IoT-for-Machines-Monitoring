@@ -330,7 +330,14 @@ Scene scene = SceneManager.GetActiveScene();
 Working with the bluetooth module at first validated the hypothesis that we can set up a communication protocol between these platforms - ```Unity/Vuforia``` and ```Bluetooth/Cloud```. I designed the functions that will be needed - ```Live Data``` and ```Dashboard```. Now, we will need to do the same thing using ```Cloud``` to retrieve the data and without any plugins. 
 
 
+
+https://user-images.githubusercontent.com/59663734/139232996-25d6e132-5be6-4929-8462-b60feb838f3b.mp4
+
+
+
 Video of full project can be found at this link: https://www.youtube.com/watch?v=gVTD8ZNxCK4&ab_channel=YudhisteerChintaram
+
+
 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -733,6 +740,12 @@ We then need to fetch data from Firebase and feed it into the graphs:
 Sending data to the cloud means it can be accessed anywhere in the world. With the coming IoT projects, my AR-WiFi research will be valuable in creating dashboards and in representing the data collected into a more user-friendly way. Changing the color of the flange and the slider going up just as a thermometer would do gives a user the necessary information to understand the current situation he is in.
 
 The AR-WiFi project received more positive reviews as it solves a real problem of having dashboards available at different endpoints throughout the company for maintenance technicians, operators, QA and so on. They do not need to install computers to have access to these data or signing in a website. They will now have access registered by their sensors with the touch of a button in their mobile phone.
+
+
+
+https://user-images.githubusercontent.com/59663734/139234279-54bdd595-88da-4742-a1c4-49f92e5d813e.mp4
+
+
 
 
 The full video of the project can be found at this link: https://www.youtube.com/watch?v=-7YdQC8Mivg&ab_channel=YudhisteerChintaram and https://www.youtube.com/watch?v=gVTD8ZNxCK4&ab_channel=YudhisteerChintaram
