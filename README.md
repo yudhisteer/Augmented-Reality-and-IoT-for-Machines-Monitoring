@@ -343,6 +343,9 @@ This second sub-phase will perform the same functions as the Bluetooth one excep
 4. Display Values in Real-Time
 5. Troubleshooting
 6. Setting Firebase
+7. Parse Humidity and Temperature values
+8. Creating live-data scene
+9. Add Dynamic Scale
 
 ### 1. Setup Arduino and Sensors
 
@@ -490,5 +493,239 @@ Similar to ThingSpeak we set up a project in Firebase and create two variables t
 ![image](https://user-images.githubusercontent.com/59663734/139122774-55d191b5-4713-48d2-b716-8cb13cfb7270.png)
 
 We then need to copy our Bundle Identifier tag to Firebase and download the google-services.json to upload into Unity. We will use a RestAPI to directly send and retrieve data from Firebase.
+
+
+We create a public class named ```temperature``` to store the values fetched from the database. Then in ```Temperature.cs``` script we write the following code:
+
+```
+public class Temperature
+{
+    public string temperature;
+    public string humidity;    
+}
+```
+
+### 7. Parse Humidity and Temperature values
+
+In another file named Main.cs script we install our libraries:
+
+```
+using UnityEngine;
+using UnityEditor;
+using Models;
+using Proyecto26;
+using System.Collections.Generic;
+using UnityEngine.Networking;
+using System.Net;
+using System;
+using System.IO;
+using TMPro;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+```
+
+
+
+We will then need our Firebase Host link and Firebase project name to set up the RestAPI. We write the following code to parse the value of humidity and temperature:
+
+```
+	// Method is used to fetch value from firebase and change the flange color according to the temperature
+	public void Getvalue()
+	{		
+		RestClient.Get<Temperature>("https://fir-ar-83859.firebaseio.com/" + "FirebaseIOT" + ".json").Then(onResolved: dq =>
+		{
+			TM = dq;
+			string temperature = string.Empty;
+			for (int i = 0; i < dq.temperature.Length; i++)
+			{
+				if (Char.IsDigit(dq.temperature[i]))
+				{
+					temperature += dq.temperature[i];
+				}
+			}
+			string humidity = string.Empty;
+			for (int i = 0; i < dq.humidity.Length; i++)
+			{
+				if (Char.IsDigit(dq.humidity[i]))
+				{
+					humidity += dq.humidity[i];
+				}
+			}
+			
+			h = int.Parse(humidity);
+			t = int.Parse(temperature);
+```
+
+### 8. Creating live-data scene
+
+Similar to the Bluetooth project, we need to change the color of the flange. We do so by using the ```Mathf.Clamp``` function and get activated when ```SceneManager.GetActiveScene().name == "LiveScene"```.
+
+```
+			//change color
+			float RedColor;
+			float GreenColor;
+			float BlueColor;
+
+			//borrowed from https://github.com/augmentedstartups/IoTAR/blob/master/Lab_8_Hot_Drink_Sensor/Unity%20Scripts/ColorChange.cs
+			if(SceneManager.GetActiveScene().name == "LiveScene")
+            {
+				RedColor = Mathf.Clamp((t - 22f) / (40f - 22f), 0f, 1f);
+				Debug.Log(RedColor);
+				if (t >= 22)
+				{
+					GreenColor = Mathf.Clamp((40f - t) / (40f - 22f), 0f, 1f);
+					Debug.Log(GreenColor);
+				}
+				else
+				{
+					GreenColor = Mathf.Clamp((t - 15f) / (22f - 15f), 0f, 1f);
+					Debug.Log(GreenColor);
+				}
+
+				BlueColor = Mathf.Clamp((22f - t) / (22f - 15f), 0f, 1f);
+				Debug.Log(BlueColor);
+				flange = GameObject.Find("Flange");
+				flange.GetComponent<MeshRenderer>().materials[0].color = new Color(RedColor, GreenColor, BlueColor);
+			}
+```
+
+
+Now, to display the temperature value above the flange:
+
+```
+			if(txt != null)
+            {
+				txt.text = t + "C";
+			}
+            else
+            {
+				
+				//if (t > 50)
+				//{
+				//	t = 40;
+				//}
+				//if (t < 15)
+				//{
+				//	t = 15;
+				//}
+				temp.text = t.ToString();
+                
+				humi.text = h.ToString();
+            }
+			Debug.Log("printing");
+			Getvalue();
+		});		
+
+	}
+```
+
+### 9. Add Dynamic Scale
+
+Now, compared to the Bluetooth Project we also want to show a dynamic scale of how the temperature changes. We start by creating scale in PNG format and upload it to Unity. Then for the dynamic slider, we use the in-built slider option in Unity. We set up the maximum to be ```50°C``` and minimum ```15°C```.
+
+![image](https://user-images.githubusercontent.com/59663734/139228074-2d7f36d6-34e7-4846-8fa2-5520e2bf29fa.png)
+
+
+```
+    private void Update()
+    {
+		if (SceneManager.GetActiveScene().name == "LiveScene")
+		{
+			if (cubeScale.value < t)
+			{
+				cubeScale.value += 0.2f;
+			}
+			if (cubeScale.value > t)
+			{
+				cubeScale.value -= 0.2f;
+			}
+		}
+		//if(t >= 35)
+		//      {
+		//	temp2 = (t / 100f) - 0.2f;
+		//      }
+		//if (t >= 22 && t <= 34)
+		//{
+		//	temp2 = (t / 100f) - 0.2f;
+		//}
+		//if (t <= 21 && t > 15)
+		//{
+		//	temp2 = (t / 100f) - 0.2f;
+		//}
+		//if (t <= 15)
+		//{
+		//	temp2 = (t / 100f) - 0.09f;
+		//}
+		//if (SceneManager.GetActiveScene().name == "LiveScene")
+		//	cubeScale.transform.position = Vector3.MoveTowards(cubeScale.transform.position, new Vector3(cubeScale.transform.position.x, temp2, cubeScale.transform.position.z), 6f*Time.deltaTime) ;
+	}
+```
+
+### 10. Create Dashboard Scene
+
+The Dashboard scene will be similar to the Bluetooth Project except instead of having the two graphs - temperature and humidity - in one chart, this time we will separate. So we add two graphs next to each other as such:
+
+![image](https://user-images.githubusercontent.com/59663734/139228870-284e2a1d-354f-4d71-8118-6e215ee18863.png)
+
+We will still have a Virtual Button to display the graphs on when pressing on it. We initialize two charts and append one to** Temperature Values** and the other to **Humidity values**:
+
+```
+    public GraphChart chart,chart2;
+    //public BluetoothManager btManager;
+    private float Timer;
+    private float X;
+    public int i;
+    // Start is called before the first frame update
+    void Start()
+    {
+        //chart.DataSource.ClearCategory("humidity");
+        //chart2.DataSource.ClearCategory("temperature");
+        chart2.DataSource.ClearCategory("humidity");
+        chart.DataSource.ClearCategory("temperature");
+        Timer = 0.5f;
+        X = 4f;
+    }
+```
+
+We then need to fetch data from Firebase and feed it into the graphs:
+
+```
+ // Update is called once per frame
+    void Update()
+    {
+
+        Timer -= Time.deltaTime;        
+        if (Timer < 0f)
+        {
+            
+             
+            //Debug.Log("Updating GRAPH");
+
+            Timer = 1f;
+
+            // values fetched from firebase
+            int temperature = this.gameObject.GetComponent<MainScript>().t;
+            int humidity = this.gameObject.GetComponent<MainScript>().h;
+            //chart.DataSource.
+            chart.DataSource.AddPointToCategoryRealtime("Temperature", X, temperature, 1f);
+            //chart.DataSource.AddPointToCategoryRealtime("Humidity", X, i, 1f);
+            //chart2.DataSource.AddPointToCategoryRealtime("Temperature", X, i, 1f);
+            chart2.DataSource.AddPointToCategoryRealtime("Humidity", X, humidity, 1f);            
+            
+            X++;
+            chart2.DataSource.StartBatch();
+            chart.DataSource.StartBatch();
+
+            chart.DataSource.EndBatch();
+            chart2.DataSource.EndBatch();
+        }
+
+        
+
+    }
+```
+
+## Conclusion
+
 
 
